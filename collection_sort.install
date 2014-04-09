@@ -1,0 +1,17 @@
+<?php
+/**
+ * @file
+ * Collection sort install.
+ */
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Deletes our variables.
+ */
+function collection_sort_uninstall() {
+  $variables = array(
+  );
+
+  array_map('variable_del', $variables);
+}

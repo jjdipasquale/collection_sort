@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for Vassar.
+ */
+
+//define('COLLECTION_SORT_FULLTEXT_PATH', 'collection_sort/bookreader_fulltext');
+
+// Includes functions to create sort blocks.
+require_once dirname(__FILE__) . '/includes/blocks.inc';
+
+/**
+ * Implements hook_islandora_basic_collection_query_alter().
+ */
+
+function collection_sort_islandora_basic_collection_query_alter(array &$params) {
+   $sort = '?title ?date';
+   $url = $_SERVER['REQUEST_URI'];
+
+   if (stristr($url,'sortby=date'))
+        $sort = '?date ?title';
+
+   //$params['vars'] =  '?object ?title ?date'; // jd added ?date
+   $params['vars'] =  '*'; 
+   $params['order_by'] = $sort; // jd added ?date
+
+   $object = $params['object'];
+
+// testing this out
+  $query = <<<EOQ
+SELECT DISTINCT !vars
+FROM <#ri>
+WHERE {
+  !statements .
+  !filters
+}
+EOQ;
+
+  $filters = array();
+  foreach (module_invoke_all('islandora_basic_collection_get_query_filters') as $filter) {
+    $filters[] = "FILTER($filter)";
+  }
+
+  $statements = collection_sort_islandora_basic_collection_get_query_statements();
+  $query = format_string($query, array(
+    '!statements' => $statements,
+    '!filters' => implode(' ', $filters),
+    '!vars' => $params['vars'],
+  ));
+
+  $query = format_string($query, array(
+    '!pid' => $object->id,
+    '!model' => $params['model'],
+  ));
+
+  if ($params['order_by']) {
+    $query .= <<<EOQO
+ORDER BY {$params['order_by']}
+EOQO;
+  }
+
+$params['query'] = $query;
+return $params;
+}
+
+/**
+ * Implements hook_islandora_basic_collection_get_query_statements().
+ */
+// jd added date
+function collection_sort_islandora_basic_collection_get_query_statements() {
+ return <<<EOQ
+  ?object ?collection_predicate <info:fedora/!pid> ;
+          <fedora-model:label> ?title ;
+          <fedora-model:hasModel> !model ;
+          <fedora-model:state> <fedora-model:Active>
+          OPTIONAL {?object <dc:date> ?date } 
+EOQ;
+}
