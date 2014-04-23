@@ -38,11 +38,13 @@ WHERE {
 EOQ;
 
   $filters = array();
-  foreach (module_invoke_all('islandora_basic_collection_get_query_filters') as $filter) {
+  //foreach (module_invoke_all('islandora_basic_collection_get_query_filters') as $filter) {
+ foreach(module_invoke_all('islandora_basic_collection_get_query_filters', $type = 'view') as $filter) {
     $filters[] = "FILTER($filter)";
   }
 
-  $statements = collection_sort_islandora_basic_collection_get_query_statements();
+  //$statements = collection_sort_islandora_basic_collection_get_query_statements($type = 'view');
+  $statements = implode(" ", collection_sort_islandora_basic_collection_get_query_statements($type = 'view'));
   $query = format_string($query, array(
     '!statements' => $statements,
     '!filters' => implode(' ', $filters),
@@ -60,15 +62,18 @@ ORDER BY {$params['order_by']}
 EOQO;
   }
 
+//echo $query;
 $params['query'] = $query;
 return $params;
-}
+} // end FUNCTION collection_sort_islandora_basic_collection_query_alter
 
 /**
  * Implements hook_islandora_basic_collection_get_query_statements().
  */
 // jd added date
-function collection_sort_islandora_basic_collection_get_query_statements() {
+function collection_sort_islandora_basic_collection_get_query_statements($type = 'view') {
+//function collection_sort_islandora_basic_collection_get_query_statements() {
+/*
  return <<<EOQ
   ?object ?collection_predicate <info:fedora/!pid> ;
           <fedora-model:label> ?title ;
@@ -76,4 +81,27 @@ function collection_sort_islandora_basic_collection_get_query_statements() {
           <fedora-model:state> <fedora-model:Active>
           OPTIONAL {?object <dc:date> ?date } 
 EOQ;
-}
+*/
+
+
+// ADDING ADDITIONAL OPTIONAL STATEMENTS TO COVER XACML POLICIES
+  $to_return = array();
+
+  $to_return[] = <<<EOQ
+?object ?collection_predicate <info:fedora/!pid> ;
+        <fedora-model:label> ?title ;
+        <fedora-model:ownerId> ?owner ;
+        <fedora-view:lastModifiedDate> ?date_modified ;
+        <fedora-model:hasModel> !model
+        OPTIONAL {?object <dc:date> ?date } 
+        OPTIONAL {?object <fedora-model:isManagableByRole> ?role }
+        OPTIONAL {?object <fedora-model:isManageableByUser> ?user }
+EOQ;
+
+  if ($type == 'view') {
+    $to_return[] = '?object <fedora-model:state> <fedora-model:Active>';
+  }
+  return $to_return;
+
+} // end FUNCTION collection_sort_islandora_basic_collection_get_query_statements
+
