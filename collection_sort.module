@@ -16,9 +16,10 @@ require_once dirname(__FILE__) . '/includes/blocks.inc';
 
 function collection_sort_islandora_basic_collection_query_alter(array &$params) {
    $sort = '?title ?date';
-   $url = $_SERVER['REQUEST_URI'];
+   //$url = $_SERVER['REQUEST_URI'];
+   $url = request_uri();
 
-   if (stristr($url,'sortby=date'))
+   if (stristr($url, 'sortby=date'))
         $sort = '?date ?title';
 
    //$params['vars'] =  '?object ?title ?date'; // jd added ?date
@@ -39,7 +40,7 @@ EOQ;
 
   $filters = array();
   //foreach (module_invoke_all('islandora_basic_collection_get_query_filters') as $filter) {
- foreach(module_invoke_all('islandora_basic_collection_get_query_filters', $type = 'view') as $filter) {
+ foreach (module_invoke_all('islandora_basic_collection_get_query_filters', $type = 'view') as $filter) {
     $filters[] = "FILTER($filter)";
   }
 
