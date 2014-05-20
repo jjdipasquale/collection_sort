@@ -63,7 +63,7 @@ ORDER BY {$params['order_by']}
 EOQO;
   }
 
-echo $query;
+//echo $query;
 $params['query'] = $query;
 return $params;
 } // end FUNCTION collection_sort_islandora_basic_collection_query_alter
