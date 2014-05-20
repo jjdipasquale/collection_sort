@@ -96,6 +96,7 @@ EOQ;
         <fedora-model:hasModel> !model
         OPTIONAL {?object <dc:date> ?date } 
         OPTIONAL {?object <fedora-model:isManagableByRole> ?role }
+	OPTIONAL {?object <fedora-rels-ext:isConstituentOf> ?compound }
         OPTIONAL {?object <fedora-model:isManageableByUser> ?user }
 EOQ;
 
