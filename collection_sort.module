@@ -63,7 +63,7 @@ ORDER BY {$params['order_by']}
 EOQO;
   }
 
-//echo $query;
+echo $query;
 $params['query'] = $query;
 return $params;
 } // end FUNCTION collection_sort_islandora_basic_collection_query_alter
@@ -96,6 +96,7 @@ EOQ;
         <fedora-model:hasModel> !model
         OPTIONAL {?object <dc:date> ?date } 
         OPTIONAL {?object <fedora-model:isManagableByRole> ?role }
+	OPTIONAL {?object <fedora-rels-ext:isConstituentOf> ?compound }
         OPTIONAL {?object <fedora-model:isManageableByUser> ?user }
 EOQ;
 
